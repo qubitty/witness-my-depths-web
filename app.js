@@ -19,135 +19,110 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('theme', newTheme);
     });
     
-    // Fetch poems from GitHub repo
+    // Fetch poems from local files
     fetchPoems();
 });
 
-// GitHub repository information
-const repoOwner = 'selinacoppersmith';
-const repoName = 'Witness-My-Depths';
-const apiBase = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
-// Fetch and display poems
+// Fetch poems from local files
 async function fetchPoems() {
     try {
-        // Fetch all content from the repository
-        const rootResponse = await fetch(apiBase);
-        if (!rootResponse.ok) throw new Error('Failed to fetch repository contents');
-        const rootContents = await rootResponse.json();
-        
-        // Group files by folder
-        const folders = {};
-        
-        // Process each item in the repository
-        for (const item of rootContents) {
-            if (item.type === 'dir') {
-                // Fetch folder contents
-                await processFolderContents(item.name, folders);
-            } else if (item.name.endsWith('.md') && item.name !== 'readme.md') {
-                // Add markdown files in root to "Uncategorized" folder
-                if (!folders['Uncategorized']) {
-                    folders['Uncategorized'] = [];
-                }
-                const fileContent = await fetchFileContent(item.download_url);
-                folders['Uncategorized'].push({
-                    name: item.name,
-                    path: item.path,
-                    content: fileContent
-                });
-            }
+        // Fetch poems from local files
+        const response = await fetch('/poems/index.json');
+        if (!response.ok) {
+            throw new Error('Failed to fetch poems index');
         }
         
-        // Display featured poems
-        displayFeaturedPoems(folders);
+        const poemsData = await response.json();
         
-        // Display all folders and poems
-        displayAllPoems(folders);
+        // Process the data
+        let allPoems = [];
         
+        // Process each category
+        Object.entries(poemsData).forEach(([folderName, poems]) => {
+            // Add folder info to each poem
+            poems.forEach(poem => {
+                allPoems.push({
+                    ...poem,
+                    folder: folderName
+                });
+            });
+        });
+
+        // Process featured poems
+        let featuredPoems = [];
+        try{
+            const { featuredPoems } = await import('./poems.js');
+            console.log(featuredPoems);
+            console.log(allPoems)
+
+            // Match featured poem references with actual poems in allPoems
+            const processedFeaturedPoems = featuredPoems
+                .map(featuredRef => allPoems.find(poem =>
+                    poem.path === featuredRef.path
+                ))
+                .filter(poem => poem !== undefined && poem !== null);  // Remove any not found
+
+            console.log(processedFeaturedPoems)
+
+            displayFeaturedPoems(processedFeaturedPoems);
+
+        } catch (error) {
+            console.error('Error loading featured poems:', error);
+        }
+        
+        // Display poems
+        displayAllPoems(allPoems);
+
     } catch (error) {
         console.error('Error fetching poems:', error);
-        document.getElementById('all-poems').innerHTML += 
-            `<p class="error">Failed to load poems. Please try again later.</p>`;
-    }
-}
-
-// Process contents of a folder
-async function processFolderContents(folderName, folders) {
-    try {
-        const folderResponse = await fetch(`${apiBase}/${folderName}`);
-        if (!folderResponse.ok) throw new Error(`Failed to fetch folder: ${folderName}`);
-        const folderContents = await folderResponse.json();
-        
-        folders[folderName] = [];
-        
-        // Process each markdown file in the folder
-        for (const item of folderContents) {
-            if (item.type === 'file' && item.name.endsWith('.md')) {
-                const fileContent = await fetchFileContent(item.download_url);
-                folders[folderName].push({
-                    name: item.name,
-                    path: item.path,
-                    content: fileContent
-                });
-            }
-        }
-    } catch (error) {
-        console.error(`Error processing folder ${folderName}:`, error);
-    }
-}
-
-// Fetch content of a markdown file
-async function fetchFileContent(url) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to fetch file: ${url}`);
-        return await response.text();
-    } catch (error) {
-        console.error(`Error fetching file: ${url}`, error);
-        return null;
+        const main = document.querySelector('main');
+        main.innerHTML = `<div class="error">Error loading poems: ${error.message}</div>`;
     }
 }
 
 // Display featured poems
-function displayFeaturedPoems(folders) {
+function displayFeaturedPoems(featuredPoems) {
     const featuredList = document.getElementById('featured-poems-list');
     
-    for (const featured of featuredPoems) {
-        let foundPoem = null;
-        const pathParts = featured.path.split('/');
-        const folderName = pathParts.length > 1 ? pathParts[0] : 'Uncategorized';
-        const fileName = pathParts[pathParts.length - 1];
+    if (!featuredPoems || featuredPoems.length === 0) {
+        featuredList.innerHTML = '<li>No featured poems available</li>';
+        return;
+    }
+
+    for (const poem of featuredPoems) {
+        // Create poem element with link to view full poem
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = poem.title || formatTitle(poem.name);
+        a.dataset.folder = poem.folder;
+        a.dataset.filename = poem.name;
+        a.addEventListener('click', function(e) {
+            e.preventDefault();
+            displayPoemDetail(poem, poem.folder);
+        });
         
-        // Find matching poem in folders
-        if (folders[folderName]) {
-            foundPoem = folders[folderName].find(poem => poem.name === fileName);
-        }
-        
-        if (foundPoem) {
-            // Create poem element with link to view full poem
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = '#';
-            a.textContent = featured.title || formatTitle(foundPoem.name);
-            a.dataset.folder = folderName;
-            a.dataset.filename = foundPoem.name;
-            a.addEventListener('click', function(e) {
-                e.preventDefault();
-                displayPoemDetail(foundPoem, folderName);
-            });
-            
-            li.appendChild(a);
-            featuredList.appendChild(li);
-        }
+        li.appendChild(a);
+        featuredList.appendChild(li);
     }
 }
 
 // Display all poems by folder
-function displayAllPoems(folders) {
+function displayAllPoems(allPoems) {
     const foldersContainer = document.getElementById('folders-container');
     
+    // Group poems by folder
+    const folderGroups = {};
+    allPoems.forEach(poem => {
+        if (!folderGroups[poem.folder]) {
+            folderGroups[poem.folder] = [];
+        }
+        folderGroups[poem.folder].push(poem);
+    });
+
     // Sort folder names alphabetically
-    const sortedFolderNames = Object.keys(folders).sort();
+    const sortedFolderNames = Object.keys(folderGroups).sort();
     
     // Move "Uncategorized" to the end if it exists
     if (sortedFolderNames.includes('Uncategorized')) {
@@ -166,8 +141,13 @@ function displayAllPoems(folders) {
         const poemsList = document.createElement('ul');
         
         // Sort poems by name
-        const poems = folders[folderName];
-        poems.sort((a, b) => a.name.localeCompare(b.name));
+        const poems = folderGroups[folderName];
+
+        poems.sort((a, b) => {
+            const nameA = formatTitle(a.name);
+            const nameB = formatTitle(b.name);
+            return nameA.localeCompare(nameB);
+        });
         
         for (const poem of poems) {
             const li = document.createElement('li');
@@ -213,7 +193,9 @@ function displayPoemDetail(poem, folderName) {
     // Create poem content
     const content = document.createElement('div');
     content.className = 'poem-content';
-    content.textContent = poem.content;
+    
+    // Use marked library to parse markdown content
+    content.innerHTML = marked.parse(poem.content);
     
     // Create navigation
     const nav = document.createElement('div');
@@ -242,10 +224,18 @@ function displayPoemDetail(poem, folderName) {
     window.scrollTo(0, 0);
 }
 
+// Configure marked options
+marked.setOptions({
+    breaks: true,  // Convert \n to <br>
+    gfm: true,     // Enable GitHub Flavored Markdown
+    headerIds: false, // Disable header IDs
+    mangle: false,  // Don't escape HTML
+    sanitize: false // Don't sanitize HTML
+});
+
 // Format title from filename
 function formatTitle(filename) {
     return filename
         .replace(/\.md$/, '')
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
+        .replace(/-/g, ' ');
 } 

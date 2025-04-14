@@ -44,4 +44,4 @@ The site styling is contained in `styles.css`. You can edit this file to change 
 
 The site is automatically deployed to GitHub Pages using GitHub Actions when changes are pushed to the main branch.
 
-The live site is available at: https://yourusername.github.io/witness-my-depths-web/ 
+The live site is available at: https://qubitty.github.io/witness-my-depths-web/ 
