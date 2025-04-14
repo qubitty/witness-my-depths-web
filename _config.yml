@@ -1,7 +1,7 @@
 title: Witness My Depths
 description: A collection of poems
 baseurl: "/witness-my-depths-web"
-url: ""
+url: "https://qubitty.github.io"
 
 # Build settings
 markdown: kramdown
