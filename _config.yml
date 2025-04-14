@@ -1,0 +1,27 @@
+title: Witness My Depths
+description: A collection of poems
+baseurl: "/witness-my-depths-web"
+url: ""
+
+# Build settings
+markdown: kramdown
+remote_theme: jekyll/minima
+plugins:
+  - jekyll-feed
+  - jekyll-remote-theme
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Collections
+collections:
+  poems:
+    output: true
+    permalink: /:collection/:name/ 

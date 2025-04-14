@@ -1,0 +1,56 @@
+---
+layout: default
+---
+
+<article class="poem">
+  <header class="poem-header">
+    <h1>{{ page.title }}</h1>
+    {% if page.folder %}
+    <div class="poem-meta">
+      <span class="poem-folder">From: {{ page.folder }}</span>
+      {% if page.original_filename %}
+      <span class="poem-filename">({{ page.original_filename }})</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="poem-content">
+    {{ content }}
+  </div>
+
+  <nav class="poem-navigation">
+    {% assign ordered_poems = site.data.poem_order.poems %}
+    {% assign poem_index = -1 %}
+    
+    {% for poem in ordered_poems %}
+      {% assign poem_name_parts = page.name | split: "-" %}
+      {% assign hash_suffix = poem_name_parts | last %}
+      {% assign filename_without_hash = poem.filename | split: "-" | slice: 0..-2 | join: "-" %}
+      {% assign page_name_without_hash = page.name | split: "-" | slice: 0..-2 | join: "-" %}
+      
+      {% if poem.filename == page.name or filename_without_hash == page_name_without_hash %}
+        {% assign poem_index = forloop.index0 %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    
+    {% if poem_index > 0 %}
+      {% assign prev_poem = ordered_poems[poem_index | minus: 1] %}
+      {% assign prev_path = site.poems | where_exp: "item", "item.name == prev_poem.filename or item.name contains prev_poem.filename" | first %}
+      {% if prev_path %}
+        <a href="{{ prev_path.url | relative_url }}" class="prev-poem">Previous</a>
+      {% endif %}
+    {% endif %}
+    
+    <a href="{{ '/' | relative_url }}" class="home-link">All Poems</a>
+    
+    {% if poem_index >= 0 and poem_index < ordered_poems.size | minus: 1 %}
+      {% assign next_poem = ordered_poems[poem_index | plus: 1] %}
+      {% assign next_path = site.poems | where_exp: "item", "item.name == next_poem.filename or item.name contains next_poem.filename" | first %}
+      {% if next_path %}
+        <a href="{{ next_path.url | relative_url }}" class="next-poem">Next</a>
+      {% endif %}
+    {% endif %}
+  </nav>
+</article> 
