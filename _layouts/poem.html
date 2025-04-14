@@ -24,32 +24,42 @@ layout: default
     {% assign poem_index = -1 %}
     
     {% for poem in ordered_poems %}
-      {% assign poem_name_parts = page.name | split: "-" %}
-      {% assign hash_suffix = poem_name_parts | last %}
-      {% assign filename_without_hash = poem.filename | split: "-" | slice: 0..-2 | join: "-" %}
-      {% assign page_name_without_hash = page.name | split: "-" | slice: 0..-2 | join: "-" %}
+      {% assign current_filename = page.name | split: "." | first %}
+      {% assign poem_filename = poem.filename | split: "." | first %}
       
-      {% if poem.filename == page.name or filename_without_hash == page_name_without_hash %}
+      {% if current_filename contains poem_filename or poem_filename contains current_filename %}
         {% assign poem_index = forloop.index0 %}
         {% break %}
       {% endif %}
     {% endfor %}
     
     {% if poem_index > 0 %}
-      {% assign prev_poem = ordered_poems[poem_index | minus: 1] %}
-      {% assign prev_path = site.poems | where_exp: "item", "item.name == prev_poem.filename or item.name contains prev_poem.filename" | first %}
-      {% if prev_path %}
-        <a href="{{ prev_path.url | relative_url }}" class="prev-poem">Previous</a>
-      {% endif %}
+      {% assign prev_index = poem_index | minus: 1 %}
+      {% assign prev_poem = ordered_poems[prev_index] %}
+      {% for site_poem in site.poems %}
+        {% assign site_poem_name = site_poem.name | split: "." | first %}
+        {% assign prev_poem_name = prev_poem.filename | split: "." | first %}
+        {% if site_poem_name contains prev_poem_name or prev_poem_name contains site_poem_name %}
+          <a href="{{ site_poem.url | relative_url }}" class="prev-poem">Previous</a>
+          {% break %}
+        {% endif %}
+      {% endfor %}
     {% endif %}
     
     <a href="{{ '/' | relative_url }}" class="home-link">All Poems</a>
     
-    {% if poem_index >= 0 and poem_index < ordered_poems.size | minus: 1 %}
-      {% assign next_poem = ordered_poems[poem_index | plus: 1] %}
-      {% assign next_path = site.poems | where_exp: "item", "item.name == next_poem.filename or item.name contains next_poem.filename" | first %}
-      {% if next_path %}
-        <a href="{{ next_path.url | relative_url }}" class="next-poem">Next</a>
+    {% if poem_index >= 0 %}
+      {% assign next_index = poem_index | plus: 1 %}
+      {% if next_index < ordered_poems.size %}
+        {% assign next_poem = ordered_poems[next_index] %}
+        {% for site_poem in site.poems %}
+          {% assign site_poem_name = site_poem.name | split: "." | first %}
+          {% assign next_poem_name = next_poem.filename | split: "." | first %}
+          {% if site_poem_name contains next_poem_name or next_poem_name contains site_poem_name %}
+            <a href="{{ site_poem.url | relative_url }}" class="next-poem">Next</a>
+            {% break %}
+          {% endif %}
+        {% endfor %}
       {% endif %}
     {% endif %}
   </nav>

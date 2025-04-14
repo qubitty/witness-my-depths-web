@@ -12,18 +12,29 @@ title: Home
     <h3>Featured Poems</h3>
     <ul class="poem-entries">
       {% for poem_entry in ordered_poems %}
-        {% assign poem = site.poems | where_exp: "item", "item.name == poem_entry.filename or item.name contains poem_entry.filename" | first %}
-        {% if poem %}
-          <li>
-            <a href="{{ poem.url | relative_url }}">
-              {% if poem_entry.title %}
-                {{ poem_entry.title }}
-              {% else %}
-                {{ poem.title }}
-              {% endif %}
-            </a>
-          </li>
-        {% endif %}
+        {% assign entry_filename = poem_entry.filename | split: "." | first %}
+        {% assign found_poem = false %}
+        
+        {% for site_poem in site.poems %}
+          {% assign site_poem_name = site_poem.name | split: "." | first %}
+          {% if site_poem_name contains entry_filename or entry_filename contains site_poem_name %}
+            <li>
+              <a href="{{ site_poem.url | relative_url }}">
+                {% if poem_entry.title %}
+                  {{ poem_entry.title }}
+                {% else %}
+                  {{ site_poem.title }}
+                {% endif %}
+              </a>
+            </li>
+            {% assign found_poem = true %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+        
+        {% unless found_poem %}
+          <li class="not-found">{{ poem_entry.title }} (not found)</li>
+        {% endunless %}
       {% endfor %}
     </ul>
   {% endif %}
