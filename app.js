@@ -27,13 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fetch poems from local files
 async function fetchPoems() {
     try {
-        // Get the base path for the repository
-        const basePath = location.hostname === "localhost" || location.hostname === "127.0.0.1"
-            ? '' 
-            : '/witness-my-depths-web';
-
         // Fetch poems from local files
-        const response = await fetch(`${basePath}/poems/index.json`);
+        const response = await fetch(`${window.basePath}/poems/index.json`);
         if (!response.ok) {
             throw new Error('Failed to fetch poems index');
         }
@@ -226,7 +221,7 @@ function displayPoemDetail(poem, folderName) {
 
 // Configure marked options
 marked.setOptions({
-    breaks: true,  // Convert \n to <br>
+    breaks: false,  // Convert \n to <br>
     gfm: true,     // Enable GitHub Flavored Markdown
     headerIds: false, // Disable header IDs
     mangle: false,  // Don't escape HTML

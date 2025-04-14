@@ -10,7 +10,9 @@
 <body>
     <div class="container">
         <header>
-            <h1><a href="/" id="site-title">Witness My Depths</a></h1>
+            <h1>
+                <a href="/" id="site-title">Witness My Depths</a>
+            </h1>
             <button id="theme-toggle" aria-label="Toggle dark/light theme">
                 <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -48,5 +50,10 @@
 
     <script src="poems.js"></script>
     <script src="app.js"></script>
+    <script>
+        window.basePath = location.hostname === "localhost" || location.hostname === "127.0.0.1" 
+          ? '' 
+          : '/witness-my-depths-web';
+    </script>
 </body>
 </html> 
