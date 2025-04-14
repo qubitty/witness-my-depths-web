@@ -27,8 +27,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fetch poems from local files
 async function fetchPoems() {
     try {
+        // Get the base path for the repository
+        const basePath = location.hostname === "localhost" || location.hostname === "127.0.0.1"
+            ? '' 
+            : '/witness-my-depths-web';
+
         // Fetch poems from local files
-        const response = await fetch('/poems/index.json');
+        const response = await fetch(`${basePath}/poems/index.json`);
         if (!response.ok) {
             throw new Error('Failed to fetch poems index');
         }
@@ -50,11 +55,8 @@ async function fetchPoems() {
         });
 
         // Process featured poems
-        let featuredPoems = [];
         try{
             const { featuredPoems } = await import('./poems.js');
-            console.log(featuredPoems);
-            console.log(allPoems)
 
             // Match featured poem references with actual poems in allPoems
             const processedFeaturedPoems = featuredPoems
@@ -62,8 +64,6 @@ async function fetchPoems() {
                     poem.path === featuredRef.path
                 ))
                 .filter(poem => poem !== undefined && poem !== null);  // Remove any not found
-
-            console.log(processedFeaturedPoems)
 
             displayFeaturedPoems(processedFeaturedPoems);
 
