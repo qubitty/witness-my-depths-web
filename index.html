@@ -6,12 +6,12 @@ title: Home
 <div class="poems-list">
   <h2>Poems</h2>
 
-  {% assign ordered_poems = site.data.poem_order.poems %}
+  {% assign ordered_poems_config = site.data.poem_order.poems %}
   
-  {% if ordered_poems.size > 0 %}
+  {% if ordered_poems_config.size > 0 %}
     <h3>Featured Poems</h3>
     <ul class="poem-entries">
-      {% for poem_entry in ordered_poems %}
+      {% for poem_entry in ordered_poems_config %}
         {% assign entry_filename = poem_entry.filename | split: "." | first %}
         {% assign found_poem = false %}
         
@@ -41,40 +41,42 @@ title: Home
   
   <h3>All Poems</h3>
   
-  {% assign all_poems = site.poems | sort: "folder" %}
-  {% assign folders = all_poems | map: "folder" | uniq %}
+  {% assign all_poems = site.poems %}
+  {% assign all_folders = "" | split: "" %}
   
-  {% for folder in folders %}
-    {% if folder %}
-      <div class="folder-section">
-        <h4>{{ folder | capitalize }}</h4>
-        <ul class="poem-entries">
-          {% assign folder_poems = all_poems | where: "folder", folder %}
-          {% for poem in folder_poems %}
-            <li>
-              <a href="{{ poem.url | relative_url }}">{{ poem.title }}</a>
-              {% if poem.original_filename %}
-                <span class="original-filename">({{ poem.original_filename }})</span>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% else %}
-      <div class="folder-section">
-        <h4>Uncategorized</h4>
-        <ul class="poem-entries">
-          {% assign uncategorized_poems = all_poems | where_exp: "item", "item.folder == nil or item.folder == ''" %}
-          {% for poem in uncategorized_poems %}
-            <li>
-              <a href="{{ poem.url | relative_url }}">{{ poem.title }}</a>
-              {% if poem.original_filename %}
-                <span class="original-filename">({{ poem.original_filename }})</span>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
+  {% for poem in all_poems %}
+    {% if poem.folder %}
+      {% assign all_folders = all_folders | push: poem.folder %}
     {% endif %}
   {% endfor %}
+  
+  {% assign unique_folders = all_folders | uniq | sort %}
+  
+  {% for folder in unique_folders %}
+    <div class="folder-section">
+      <h4>{{ folder | capitalize }}</h4>
+      
+      {% assign folder_poem_list = "" | split: "" %}
+      {% for poem in all_poems %}
+        {% if poem.folder == folder %}
+          {% assign folder_poem_list = folder_poem_list | push: poem %}
+        {% endif %}
+      {% endfor %}
+      
+      {% include poem-list.html poems=folder_poem_list %}
+    </div>
+  {% endfor %}
+  
+  <div class="folder-section">
+    <h4>Uncategorized</h4>
+    
+    {% assign uncat_poem_list = "" | split: "" %}
+    {% for poem in all_poems %}
+      {% unless poem.folder %}
+        {% assign uncat_poem_list = uncat_poem_list | push: poem %}
+      {% endunless %}
+    {% endfor %}
+    
+    {% include poem-list.html poems=uncat_poem_list %}
+  </div>
 </div> 

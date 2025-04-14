@@ -1,0 +1,12 @@
+{% assign folder_poems = include.poems %}
+
+<ul class="poem-entries">
+  {% for poem in folder_poems %}
+    <li>
+      <a href="{{ poem.url | relative_url }}">{{ poem.title }}</a>
+      {% if poem.original_filename %}
+        <span class="original-filename">({{ poem.original_filename }})</span>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul> 
