@@ -1,77 +1,47 @@
 # Witness My Depths - Poetry Website
 
-A minimalistic Jekyll website for displaying poems from [Witness My Depths](https://github.com/selinacoppersmith/Witness-My-Depths).
+A simple static website that displays poems from the [Witness My Depths](https://github.com/selinacoppersmith/Witness-My-Depths) repository.
 
 ## Features
 
-- Pulls poems from the entire GitHub repository, preserving folder structure
-- Organizes poems by their folders on the homepage
+- Pulls poems directly from the GitHub repository
 - Minimalistic black and white design
 - Dark/light mode toggle
-- Custom ordering of featured poems
+- Organizes poems by their folders
+- Featured poems section
 
-## Setup
+## How It Works
 
-### Local Development
+This is a completely static website that uses JavaScript to:
 
-1. Install Jekyll and Bundler:
-   ```
-   gem install jekyll bundler
-   ```
-
-2. Install dependencies:
-   ```
-   bundle install
-   ```
-
-3. Fetch poems from the repository:
-   ```
-   ruby scripts/fetch_poems.rb
-   ```
-
-4. Run the development server:
-   ```
-   bundle exec jekyll serve
-   ```
-
-5. Visit `http://localhost:4000` in your browser
-
-### Deploying to GitHub Pages
-
-1. Push this repository to GitHub
-2. Go to Settings > Pages
-3. Set Source to "GitHub Actions"
-4. GitHub will automatically build and deploy your site
-5. The site will automatically update with new poems daily
+1. Fetch poems from the GitHub repository via the API
+2. Display poems organized by their folders
+3. Show featured poems in a specified order
+4. Provide a simple reading experience
 
 ## Customizing
 
-### Featured Poem Order
+### Featured Poems
 
-Edit the `_data/poem_order.yml` file to change the order of featured poems:
+To change which poems are featured, edit the `poems.js` file:
 
-```yaml
-poems:
-  - filename: folder-name-poem1.md
-    title: Optional Custom Title
-  - filename: folder-name-poem2.md
-  - filename: folder-name-poem3.md
+```javascript
+// Featured poems in display order
+const featuredPoems = [
+    {
+        path: "done-ish/on grief.md",
+        title: "On Grief"
+    },
+    // Add more featured poems here
+];
 ```
 
-Note: The filename should include the folder prefix that was created during the fetching process.
+### Styling
 
-### Updating Poems
+The site styling is contained in `styles.css`. You can edit this file to change colors, fonts, and layout.
 
-To update the poems from the repository:
+## Deployment
 
-```
-ruby scripts/fetch_poems.rb
-```
+The site is automatically deployed to GitHub Pages using GitHub Actions when changes are pushed to the main branch.
 
-This will fetch all markdown files from the entire Witness My Depths repository. The poems will be organized by their folder location.
-
-### Customizing Design
-
-- Main SCSS file: `_sass/main.scss`
-- Layout templates: `_layouts/` directory
-- JavaScript for theme toggle: `assets/js/theme.js` 
+The live site is available at: https://yourusername.github.io/witness-my-depths-web/ 

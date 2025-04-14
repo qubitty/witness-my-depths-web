@@ -1,82 +1,36 @@
----
-layout: default
-title: Home
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Witness My Depths</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Witness My Depths</h1>
+            <button id="theme-toggle">Toggle Dark/Light Mode</button>
+        </header>
 
-<div class="poems-list">
-  <h2>Poems</h2>
+        <main>
+            <section id="featured">
+                <h2>Featured Poems</h2>
+                <ul id="featured-poems-list"></ul>
+            </section>
 
-  {% assign ordered_poems_config = site.data.poem_order.poems %}
-  
-  {% if ordered_poems_config.size > 0 %}
-    <h3>Featured Poems</h3>
-    <ul class="poem-entries">
-      {% for poem_entry in ordered_poems_config %}
-        {% assign entry_filename = poem_entry.filename | split: "." | first %}
-        {% assign found_poem = false %}
-        
-        {% for site_poem in site.poems %}
-          {% assign site_poem_name = site_poem.name | split: "." | first %}
-          {% if site_poem_name contains entry_filename or entry_filename contains site_poem_name %}
-            <li>
-              <a href="{{ site_poem.url | relative_url }}">
-                {% if poem_entry.title %}
-                  {{ poem_entry.title }}
-                {% else %}
-                  {{ site_poem.title }}
-                {% endif %}
-              </a>
-            </li>
-            {% assign found_poem = true %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-        
-        {% unless found_poem %}
-          <li class="not-found">{{ poem_entry.title }} (not found)</li>
-        {% endunless %}
-      {% endfor %}
-    </ul>
-  {% endif %}
-  
-  <h3>All Poems</h3>
-  
-  {% assign all_poems = site.poems %}
-  {% assign all_folders = "" | split: "" %}
-  
-  {% for poem in all_poems %}
-    {% if poem.folder %}
-      {% assign all_folders = all_folders | push: poem.folder %}
-    {% endif %}
-  {% endfor %}
-  
-  {% assign unique_folders = all_folders | uniq | sort %}
-  
-  {% for folder in unique_folders %}
-    <div class="folder-section">
-      <h4>{{ folder | capitalize }}</h4>
-      
-      {% assign folder_poem_list = "" | split: "" %}
-      {% for poem in all_poems %}
-        {% if poem.folder == folder %}
-          {% assign folder_poem_list = folder_poem_list | push: poem %}
-        {% endif %}
-      {% endfor %}
-      
-      {% include poem-list.html poems=folder_poem_list %}
+            <section id="all-poems">
+                <h2>All Poems</h2>
+                <div id="folders-container"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>A collection of poems from <a href="https://github.com/selinacoppersmith/Witness-My-Depths" target="_blank">Witness My Depths</a>.</p>
+        </footer>
     </div>
-  {% endfor %}
-  
-  <div class="folder-section">
-    <h4>Uncategorized</h4>
-    
-    {% assign uncat_poem_list = "" | split: "" %}
-    {% for poem in all_poems %}
-      {% unless poem.folder %}
-        {% assign uncat_poem_list = uncat_poem_list | push: poem %}
-      {% endunless %}
-    {% endfor %}
-    
-    {% include poem-list.html poems=uncat_poem_list %}
-  </div>
-</div> 
+
+    <script src="poems.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
