@@ -12,18 +12,26 @@ jobs:
   github-pages:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
+          bundler-cache: false # Disable bundler-cache to handle it manually
+      
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
       
       - name: Fetch poems
         run: |
           mkdir -p _poems
-          bundle install
           ruby scripts/fetch_poems.rb
       
       - name: Build site
@@ -35,4 +43,5 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site 
+          publish_dir: ./_site
+          publish_branch: gh-pages 
