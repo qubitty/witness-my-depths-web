@@ -5,6 +5,10 @@ export const featuredPoems = [
         title: "Divided"
     },
     {
+        path: "done-ish/Mr Tubbs.md",
+        title: "Mr Tubbs"
+    },
+    {
         path: "done-ish/on depression.md",
         title: "on depression"
     },

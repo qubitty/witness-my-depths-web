@@ -2,7 +2,12 @@ name: Deploy to GitHub Pages
 
 on:
   push:
+    # Trigger on push to the main branch
     branches: ["main"]
+  workflow_run:
+    # Trigger on successful completion of the "Update Poems" workflow
+    workflows: ["Update Poems"]
+    types: ["completed"]
   workflow_dispatch:
 
 permissions:

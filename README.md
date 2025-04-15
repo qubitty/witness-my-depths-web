@@ -1,29 +1,14 @@
-# Witness My Depths - Poetry Website
+# Witness My Depths Website
 
-A simple static website that displays poems from the [Witness My Depths](https://github.com/selinacoppersmith/Witness-My-Depths) repository.
+A simple website that displays poems from the [Witness My Depths](https://github.com/selinacoppersmith/Witness-My-Depths) repository.
 
 ## Features
 
 - Pulls poems directly from the GitHub repository
-- Minimalistic black and white design
-- Dark/light mode toggle
-- Organizes poems by their folders
-- Featured poems section
-
-## How It Works
-
-This is a completely static website that uses JavaScript to:
-
-1. Fetch poems from the GitHub repository via the API
-2. Display poems organized by their folders
-3. Show featured poems in a specified order
-4. Provide a simple reading experience
-
-## Customizing
 
 ### Featured Poems
 
-To change which poems are featured, edit the `poems.js` file:
+To change which poems are featured or to change the order of the featured poems, edit the `poems.js` file:
 
 ```javascript
 // Featured poems in display order
@@ -44,4 +29,4 @@ The site styling is contained in `styles.css`. You can edit this file to change 
 
 The site is automatically deployed to GitHub Pages using GitHub Actions when changes are pushed to the main branch.
 
-The live site is available at: https://qubitty.github.io/witness-my-depths-web/ 
+The live site is available at: https://qubitty.github.io/witness-my-depths-web/.

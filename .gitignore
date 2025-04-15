@@ -35,6 +35,7 @@ Thumbs.db
 .project
 .classpath
 .settings/
+*.code-workspace
 
 # Logs
 logs/
