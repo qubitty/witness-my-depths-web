@@ -4,8 +4,19 @@ title: Page Not Found
 permalink: /404.html
 ---
 
-<div class="error-page">
-  <h2>Page Not Found</h2>
-  <p>The page you're looking for doesn't exist or has been moved.</p>
-  <p><a href="{{ '/' | relative_url }}">Return to home</a></p>
-</div> 
+<!-- filepath: /404.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // Redirect to index.html for SPA routing
+        window.location.replace(window.location.origin + '/witness-my-depths-web/');
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>

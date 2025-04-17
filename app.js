@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Set up theme toggle
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.documentElement;
@@ -18,7 +18,36 @@ document.addEventListener('DOMContentLoaded', function() {
         body.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
     });
-    
+
+    // Handle direct URL access
+    const urlParts = window.location.pathname.split('/').filter(Boolean);
+    if (urlParts[0] === 'poems' && urlParts.length === 3) {
+        const folderName = urlParts[1];
+        // TODO: this can easily break if we start using other file types, fix this
+        const poemName = `${urlParts[2]}.md`; // Add .md extension back
+
+        // Fetch poems and find the requested poem
+        const response = await fetch(`${window.basePath}/poems/index.json`);
+        const poemsData = await response.json();
+        const poem = poemsData[folderName]?.find(p => p.name === poemName);
+
+        if (poem) {
+            displayPoemDetail(poem, folderName);
+            return;
+        }
+    }
+
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.poem) {
+            // Display the poem from the state
+            displayPoemDetail(event.state.poem, event.state.folderName);
+        } else {
+            // If no state, reload the poem list
+            fetchPoems();
+        }
+    });
+
     // Fetch poems from local files
     fetchPoems();
 });
@@ -27,6 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fetch poems from local files
 async function fetchPoems() {
     try {
+        // Show the poem list view and hide the poem detail view
+        document.getElementById('poem-list-view').style.display = 'block';
+        document.getElementById('poem-detail-view').style.display = 'none';
+
+        // Clear existing content
+        clearFeaturedPoems();
+        clearPoems();
+    
         // Fetch poems from local files
         const response = await fetch(`${window.basePath}/poems/index.json`);
         if (!response.ok) {
@@ -35,12 +72,9 @@ async function fetchPoems() {
         
         const poemsData = await response.json();
         
-        // Process the data
+        // Get and show the list of poems
         let allPoems = [];
-        
-        // Process each category
         Object.entries(poemsData).forEach(([folderName, poems]) => {
-            // Add folder info to each poem
             poems.forEach(poem => {
                 allPoems.push({
                     ...poem,
@@ -55,9 +89,7 @@ async function fetchPoems() {
 
             // Match featured poem references with actual poems in allPoems
             const processedFeaturedPoems = featuredPoems
-                .map(featuredRef => allPoems.find(poem =>
-                    poem.path === featuredRef.path
-                ))
+                .map(featuredRef => allPoems.find(poem => poem.path === featuredRef.path))
                 .filter(poem => poem !== undefined && poem !== null);  // Remove any not found
 
             displayFeaturedPoems(processedFeaturedPoems);
@@ -101,6 +133,11 @@ function displayFeaturedPoems(featuredPoems) {
         li.appendChild(a);
         featuredList.appendChild(li);
     }
+}
+
+function clearFeaturedPoems() {
+    const featuredList = document.getElementById('featured-poems-list');
+    featuredList.innerHTML = ''; // Clear existing featured poems
 }
 
 // Display all poems by folder
@@ -166,49 +203,57 @@ function displayAllPoems(allPoems) {
     }
 }
 
+function clearPoems() {
+    const foldersContainer = document.getElementById('folders-container');
+    foldersContainer.innerHTML = ''; // Clear existing poems
+}
+
+// Get the url path for a poem
+function getPoemUrl(folderName, poemName) {
+    return `/poems/${folderName}/${poemName.replace(/\.md$/, '')}`;
+}
+
 // Display poem detail
 function displayPoemDetail(poem, folderName) {
-    // Clear the main content
-    const main = document.querySelector('main');
-    main.innerHTML = '';
+    // Update the URL
+    const poemUrl = getPoemUrl(folderName, poem.name);
+    history.pushState({ poem, folderName }, '', poemUrl);
+
+    // Hide the poem list view and show the poem detail view
+    document.getElementById('poem-list-view').style.display = 'none';
+    const poemDetailView = document.getElementById('poem-detail-view');
+    poemDetailView.style.display = 'block';
     
-    // Create poem container
-    const poemDiv = document.createElement('div');
-    poemDiv.className = 'poem-detail';
-    
-    // Create poem title
-    const title = document.createElement('h2');
-    title.textContent = formatTitle(poem.name);
-    
-    // Create poem metadata
-    const meta = document.createElement('div');
-    meta.className = 'poem-meta';
-    meta.textContent = `From: ${folderName}`;
-    
-    // Create poem content
-    const content = document.createElement('div');
-    content.className = 'poem-content';
-    
-    // Use marked library to parse markdown content
-    content.innerHTML = marked.parse(poem.content);
-    
-    // Create navigation
-    const nav = document.createElement('div');
-    nav.className = 'poem-nav';
+    // Populate the poem detail view
+    poemDetailView.innerHTML = `
+        <div class="poem-detail">
+            <div class="poem-meta">From: ${folderName}</div>
+            <div class="poem-content">${marked.parse(poem.content)}</div>
+            <div class="poem-nav">
+                <a href="#" id="back-to-list">Back to Poems</a>
+            </div>
+        </div>
+    `;
+
+    // Add event listener for the back button
+    document.getElementById('back-to-list').addEventListener('click', function (e) {
+        e.preventDefault();
+        history.back();
+    });
     
     const backLink = document.createElement('a');
     backLink.href = '#';
     backLink.textContent = 'Back to Poems';
     backLink.addEventListener('click', function(e) {
         e.preventDefault();
-        // Reload the page to go back to poem list
-        window.location.reload();
+        history.back();
     });
     
+    const nav = document.createElement('div');
+    nav.className = 'poem-nav';
     nav.appendChild(backLink);
     
     // Assemble the poem detail view
-    poemDiv.appendChild(title);
     poemDiv.appendChild(meta);
     poemDiv.appendChild(content);
     poemDiv.appendChild(nav);
