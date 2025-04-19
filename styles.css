@@ -61,6 +61,10 @@ h1 {
 #site-title {
     color: inherit;
     text-decoration: none;
+    letter-spacing: 0.05em; /* Slight tracking */
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
 }
 
 #site-title:hover {
@@ -222,6 +226,12 @@ li {
     margin: 2em 0;
 }
 
+.poem-content + .poem-content {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px dotted #ddd;
+  }
+
 /* Dark theme adjustments */
 [data-theme="dark"] .poem-content code,
 [data-theme="dark"] .poem-content pre {
@@ -265,3 +275,27 @@ footer {
         margin-top: 15px;
     }
 } 
+
+.view-toggle {
+    font-size: 0.9rem;
+    color: var(--muted-color);
+    letter-spacing: 0.02em;
+}
+
+.view-toggle a {
+    color: var(--muted-color);  /* Force links to use muted color */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.view-toggle a:hover,
+.view-toggle a:focus {
+    color: var(--accent-color);  /* Optional: change color on hover */
+}
+
+.view-toggle.centered {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
